@@ -1,4 +1,19 @@
-const firebaseConfig = {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One-Time QR Code</title>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h2 id="status">Checking QR code...</h2>
+
+  <script>
+  const firebaseConfig = {
   apiKey: "AIzaSyDVHQt3WxpnEowa_0iKtmD7wFhzTZeL1MA",
   authDomain: "one-time-qr-50b15.firebaseapp.com",
   projectId: "one-time-qr-50b15",
@@ -7,3 +22,28 @@ const firebaseConfig = {
   appId: "1:958361984889:web:71a6b6c3b2521d9f3259a8",
   measurementId: "G-Y5XVMSFXG7"
 };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const code = new URLSearchParams(window.location.search).get("code");
+    const status = document.getElementById("status");
+
+    if (!code) {
+      status.innerText = "❌ Invalid QR code";
+    } else {
+      const ref = db.collection("qrcodes").doc(code);
+
+      ref.get().then(doc => {
+        if (!doc.exists) {
+          status.innerText = "❌ Invalid QR code";
+        } else if (doc.data().used) {
+          status.innerText = "❌ QR code already used";
+        } else {
+          ref.update({ used: true });
+          status.innerText = "✅ QR code accepted";
+        }
+      });
+    }
+  </script>
+</body>
+</html>
